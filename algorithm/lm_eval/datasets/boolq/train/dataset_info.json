@@ -1,0 +1,65 @@
+{
+  "builder_name": "super_glue",
+  "citation": "@inproceedings{clark2019boolq,\n  title={BoolQ: Exploring the Surprising Difficulty of Natural Yes/No Questions},\n  author={Clark, Christopher and Lee, Kenton and Chang, Ming-Wei, and Kwiatkowski, Tom and Collins, Michael, and Toutanova, Kristina},\n  booktitle={NAACL},\n  year={2019}\n}\n@article{wang2019superglue,\n  title={SuperGLUE: A Stickier Benchmark for General-Purpose Language Understanding Systems},\n  author={Wang, Alex and Pruksachatkun, Yada and Nangia, Nikita and Singh, Amanpreet and Michael, Julian and Hill, Felix and Levy, Omer and Bowman, Samuel R},\n  journal={arXiv preprint arXiv:1905.00537},\n  year={2019}\n}\n\nNote that each SuperGLUE dataset has its own citation. Please see the source to\nget the correct citation for each contained dataset.\n",
+  "config_name": "boolq",
+  "dataset_name": "super_glue",
+  "dataset_size": 10395714,
+  "description": "SuperGLUE (https://super.gluebenchmark.com/) is a new benchmark styled after\nGLUE with a new set of more difficult language understanding tasks, improved\nresources, and a new public leaderboard.\n\nBoolQ (Boolean Questions, Clark et al., 2019a) is a QA task where each example consists of a short\npassage and a yes/no question about the passage. The questions are provided anonymously and\nunsolicited by users of the Google search engine, and afterwards paired with a paragraph from a\nWikipedia article containing the answer. Following the original work, we evaluate with accuracy.",
+  "download_checksums": {
+    "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/BoolQ.zip": {
+      "num_bytes": 4118001,
+      "checksum": null
+    }
+  },
+  "download_size": 4118001,
+  "features": {
+    "question": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "passage": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "idx": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "label": {
+      "names": [
+        "False",
+        "True"
+      ],
+      "_type": "ClassLabel"
+    }
+  },
+  "homepage": "https://github.com/google-research-datasets/boolean-questions",
+  "license": "",
+  "size_in_bytes": 14513715,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 6173303,
+      "num_examples": 9427,
+      "dataset_name": "super_glue"
+    },
+    "validation": {
+      "name": "validation",
+      "num_bytes": 2116452,
+      "num_examples": 3270,
+      "dataset_name": "super_glue"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 2105959,
+      "num_examples": 3245,
+      "dataset_name": "super_glue"
+    }
+  },
+  "version": {
+    "version_str": "1.0.3",
+    "major": 1,
+    "minor": 0,
+    "patch": 3
+  }
+}
