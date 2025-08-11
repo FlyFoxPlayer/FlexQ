@@ -94,4 +94,10 @@ This repo benefits from [ABQ-LLM](https://github.com/bytedance/ABQ-LLM.git). We 
 ## Citation
 If you use our FlexQ approach in your research, please cite our paper:
 ```
+@article{zhang2025flexq,
+  title={FlexQ: Efficient Post-training INT6 Quantization for LLM Serving via Algorithm-System Co-Design},
+  author={Zhang, Hao and Jia, Aining and Bu, Weifeng and Cai, Yushu and Sheng, Kai and Chen, Hao and He, Xin},
+  journal={arXiv preprint arXiv:2508.04405},
+  year={2025}
+}
 ```
