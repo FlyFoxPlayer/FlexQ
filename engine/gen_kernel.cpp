@@ -9,6 +9,11 @@ int a_bits = 6;
 int mma_shape[3] = {8, 8, 128};
 int GROUP_SIZE = 128;
 
+/*
+    To demonstrate our project promptly, we currently provide only a limited set 
+    of instantiated kernel layout configurations, and we will expand with more 
+    layout configurations in future versions.
+*/
 int main(){
 	for(int cta_z = 2 * 128; cta_z <= 512; cta_z += 128)
 		for(int WARPS_X = 1; WARPS_X <= 8; WARPS_X = WARPS_X * 2)

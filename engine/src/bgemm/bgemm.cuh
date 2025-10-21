@@ -181,7 +181,7 @@ void copyAndSync(unsigned *dst, const unsigned *src, int size)
     __syncthreads();
 }
 
-// 从全局内存加载数据至共享内存（异步）（缓存驱逐策略）
+// load data from global memory to shared memory (async) (cache eviction policy)
 template <int SizeInBytes>
 __device__ inline void cpAsyncPredZfillCacheEvict(void* smem_ptr, const void* gmem_ptr,
                                                     const bool pred_guard = true, const bool zfill = false) {
@@ -199,7 +199,7 @@ __device__ inline void cpAsyncPredZfillCacheEvict(void* smem_ptr, const void* gm
   );
 }
 
-
+// load data from global memory to shared memory (async)
 template <int SizeInBytes>
 DEVICE_INLINE void cpAsyncPredZfill(void *smem_ptr, void const *gmem_ptr,
                                     const bool pred_guard = true, const bool zfill = false)

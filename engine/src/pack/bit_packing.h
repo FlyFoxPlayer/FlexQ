@@ -28,6 +28,7 @@
 //get warp id
 #define GET_WARPID unsigned warpid; asm("mov.u32 %0, %%warpid;":"=r"(warpid)); 
 
+// ABQ-LLM bit packing kernel
 void abq_bit_packing(const int* in_data, int* packed_data, const int M, const int K, const int BIT, cudaStream_t stream);
-
+// FlexQ bit packing kernel
 cudaError_t flexq_bit_packing(const int* in_data, int* packed_data, const int M, const int K, const int BIT, cudaStream_t stream);

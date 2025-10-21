@@ -67,7 +67,6 @@ __global__ void launchFQBMMAKernel(typename FQBMMAOpState::Argument_t args)
     extern __shared__ int shared_mem_workspace[];
     KernelImpl k;
     k.mainLoop(args.M, args.N, args.K, args.X, args.W, args.X_SCALE, args.W_SCALE, args.D, shared_mem_workspace, args.group_size, args.bias);
-    // k.epilogue(args.M, args.N, args.D, shared_mem_workspace, args.C, args.bias);
 }
 
 template <
@@ -93,10 +92,6 @@ void FQBMMAOp<QuantType, ThreadBlockShape, WarpShape, MmaShape, NStage, CTA_TILE
     size_t output_buffer_size_dyn = 0;
     size_t output_buffer_size = output_buffer_size_dyn + KernelImpl::output_buffer_size_static;
     this->state.shared_mem_size = max(input_buffer_size, output_buffer_size);
-    // printf("\ninput_buffer_size:%d\n", input_buffer_size);
-    // printf("output_buffer_size_dyn:%d\n", output_buffer_size_dyn);
-    // printf("output_buffer_size:%d\n", KernelImpl::output_buffer_size_static);
-    // printf("shared_mem_size:%d\n", this->state.shared_mem_size);
     if (this->state.shared_mem_size >= 32 * 1024) {
         // set kernel attribute
         if (cudaSuccess != cudaFuncSetAttribute(launchFQBMMAKernel<KernelImpl>,
@@ -107,11 +102,9 @@ void FQBMMAOp<QuantType, ThreadBlockShape, WarpShape, MmaShape, NStage, CTA_TILE
                                                 100)) {
             cudaError_t err = cudaGetLastError();
             std::cerr << "Set kernel attribute failed: " << cudaGetErrorString(err);
-            // this->state.initSuccess = false;
             initSuccessFlag = false;
         }
     }
-    // printf("dyn shared_mem_size:%d\n", this->state.shared_mem_size);
 
     // calculate launch configuration
     int gdimX = CTA_TILE_STRIDE;
@@ -135,7 +128,6 @@ void FQBMMAOp<QuantType, ThreadBlockShape, WarpShape, MmaShape, NStage, CTA_TILE
     this->state.gridDim = dim3(gdimX, gdimY, gdimZ);
     this->state.blockDim = dim3(KernelImpl::blockDims, 1, 1);
 
-    // printf("gdimX:%d gdimY:%d, KernelImpl::blockDim:%d\n", gdimX, gdimY, KernelImpl::blockDim);
     if(initSuccessFlag)
         this->state.initSuccess = true;
 }

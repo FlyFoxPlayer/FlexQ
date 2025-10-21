@@ -68,22 +68,22 @@ int main(int argc, char **argv){
     // Allocate host memory
     int *h_x = (int *)malloc(m * k * sizeof(int));
     int *h_x_pack_abq = (int *)malloc(x_bits * m * (k / 32) * sizeof(int));
-    int *h_x_pack_flexq_update_final = (int *)malloc((k / 128) * m * x_bits * 4 * sizeof(int));
+    int *h_x_pack_flexq = (int *)malloc((k / 128) * m * x_bits * 4 * sizeof(int));
 
     // Allocate device memory
     int *d_x;
     int *d_x_pack_abq;
-    int *d_x_pack_flexq_update_final;
+    int *d_x_pack_flexq;
     cudaMalloc(&d_x, m * k * sizeof(int));
     cudaMalloc(&d_x_pack_abq, x_bits * m * (k / 32) * sizeof(int));
-    cudaMalloc(&d_x_pack_flexq_update_final, (k / 128) * m * x_bits * 4 * sizeof(int));
+    cudaMalloc(&d_x_pack_flexq, (k / 128) * m * x_bits * 4 * sizeof(int));
 
     randomInitMatrix(h_x, m, k, x_bits);
     cudaMemcpy(d_x, h_x, sizeof(int) * m * k, cudaMemcpyHostToDevice);
 
     if (x_bits <= 32) {
         abq_bit_packing(d_x, d_x_pack_abq, m, k, x_bits, stream);
-        flexq_bit_packing(d_x, d_x_pack_flexq_update_final, m, k, x_bits, stream);
+        flexq_bit_packing(d_x, d_x_pack_flexq, m, k, x_bits, stream);
         cudaError_t err = cudaGetLastError();
         if (err != cudaSuccess) {
             printf("Line %d: 'activation bit_pack' failed: %s\n", __LINE__,
@@ -95,7 +95,7 @@ int main(int argc, char **argv){
         return -1;
     }
 
-    // ABQ packing kernel
+    // ABQ bit packing kernel
     CudaTimer abq_exec_timer(stream);
     for (int i = 0; i < warmup + repeat; i++) {
         if (i == warmup)
@@ -109,26 +109,26 @@ int main(int argc, char **argv){
     }
     float abq_exec_dur = abq_exec_timer.elapsed_msecs() / repeat;
 
-    // FlexQ update final packing kernel
-    CudaTimer flexq_update_final_exec_timer(stream);
+    // FlexQ bit packing kernel
+    CudaTimer flexq_bit_packing_exec_timer(stream);
     for (int i = 0; i < warmup + repeat; i++) {
         if (i == warmup)
-            flexq_update_final_exec_timer.start();
-        flexq_bit_packing(d_x, d_x_pack_flexq_update_final, m, k, x_bits, stream);
+            flexq_bit_packing_exec_timer.start();
+        flexq_bit_packing(d_x, d_x_pack_flexq, m, k, x_bits, stream);
     }
-    flexq_update_final_exec_timer.stop();
+    flexq_bit_packing_exec_timer.stop();
     if (!isCudaSuccess(cudaGetLastError())) {
-        std::cerr << "flexq update final packing kernel failed." << std::endl;
+        std::cerr << "flexq bit packing kernel failed." << std::endl;
         return -1;
     }
-    float flexq_update_final_exec_dur = flexq_update_final_exec_timer.elapsed_msecs() / repeat;
+    float flexq_bit_packing_exec_dur = flexq_bit_packing_exec_timer.elapsed_msecs() / repeat;
 
 
     cudaMemcpy(h_x_pack_abq, d_x_pack_abq, x_bits * m * (k / 32) * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(h_x_pack_flexq_update_final, d_x_pack_flexq_update_final, (k / 128) * m * x_bits * 4 * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_x_pack_flexq, d_x_pack_flexq, (k / 128) * m * x_bits * 4 * sizeof(int), cudaMemcpyDeviceToHost);
 
 
-    // Validate FlexQ packing kernel correctness
+    // Validate FlexQ bit packing kernel correctness
     bool flag = true;
     const int chunk_m = min(m, 8);
     for(int bit = 0; bit < x_bits; bit++){
@@ -138,26 +138,26 @@ int main(int argc, char **argv){
             for(int iter_k = 0; iter_k < k / 32; iter_k++){
                 // [x_bits, m, k / 32]  --> [m, k / 128, x_bits * 4]
                 if(h_x_pack_abq[bit * (m * k / 32) + iter_m * (k / 32) + iter_k] != 
-                        h_x_pack_flexq_update_final[(iter_k / 4) * (m * x_bits * 4) + chunk_m_id * (x_bits * chunk_m * 4) + bit * (chunk_m * 4) + chunk_m_row * 4 + iter_k % 4]){
+                        h_x_pack_flexq[(iter_k / 4) * (m * x_bits * 4) + chunk_m_id * (x_bits * chunk_m * 4) + bit * (chunk_m * 4) + chunk_m_row * 4 + iter_k % 4]){
                     flag = false;
                 }
             }
         }
     }
-    if(!flag)cout << "FlexQ update Packing final kernel ERROR! Inconsistent results!" << endl;
-    else cout << "FlexQ update Packing final kernel SUCCESS! consistent results!" << endl;
+    if(!flag)cout << "FlexQ bit packing kernel ERROR! Inconsistent results!" << endl;
+    else cout << "FlexQ bit packing kernel SUCCESS! consistent results!" << endl;
 
     
     printf("\nKernel performance:\n");
     printf("ABQ packing %f (us) exec\n", abq_exec_dur * 1e3);  
-    printf("FlexQ update final packing %f (us) exec\n", flexq_update_final_exec_dur * 1e3);                                     
+    printf("FlexQ bit packing %f (us) exec\n", flexq_bit_packing_exec_dur * 1e3);                                     
 
     free(h_x);
     free(h_x_pack_abq);
-    free(h_x_pack_flexq_update_final);
+    free(h_x_pack_flexq);
     cudaFree(d_x);
     cudaFree(d_x_pack_abq);
-    cudaFree(d_x_pack_flexq_update_final);
+    cudaFree(d_x_pack_flexq);
 
     cudaStreamDestroy(stream);
 

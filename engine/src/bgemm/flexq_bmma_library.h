@@ -16,6 +16,11 @@
 #include "common/base.h"
 #include "flexq_bmma_op.h"
 
+/*
+    To demonstrate our project promptly, we currently provide only a limited set 
+    of instantiated kernel layout configurations, and we will expand with more 
+    layout configurations in future versions.
+*/
 // ------------------------FlexQ W6A6------------------------
 // cta<1,16,256> warp<8,48,128> mma<8,8,128>   WARPS[1x2]
 FQ_DECL_FUN(FQBMMA, 6, 6, true, 1, 16, 256, 8, 48, 128, 8, 8, 128, 2, 1);

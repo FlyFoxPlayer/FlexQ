@@ -82,9 +82,9 @@ struct FQBMMAKernel {
         kThreadBlockStage * BLOCK_N * BLOCK_K * W_BITS / 8 + 
         kThreadBlockStage * SCALE_SIZE_X(BLOCK_M) * BLOCK_K / GROUP_SIZE * 4 + 
         kThreadBlockStage * SCALE_SIZE_W(BLOCK_N) * BLOCK_K / GROUP_SIZE * 4;
-#else
+#else // GPU_ARCH < 80
     // Not supported
-#endif // GPU_ARCH >= 80
+#endif 
 
     // The output results need to be stored in shem for scaling processing.
     // static constexpr size_t output_buffer_size_static =
@@ -127,6 +127,7 @@ FQBMMAKernel<QuantType, ThreadBlockShape, WarpShape, MmaShape, kThreadBlockStage
     const unsigned int idx_block_N = GridMappingXYToMN ? ((blockIdx.z % 2) ? (gridDim.y - blockIdx.y - 1) : (blockIdx.y)) : (blockIdx.z * gridDim.x + blockIdx.x);
     const unsigned int warp_id = threadIdx.x >> 5;
 
+    // Match the matrix fragment layout - a single warp is divided into 8 rows and 4 columns
     const int tid = threadIdx.x & 31;
     const int tid_row = tid >> 2;
     const int tid_col = tid % 4;
@@ -200,6 +201,7 @@ FQBMMAKernel<QuantType, ThreadBlockShape, WarpShape, MmaShape, kThreadBlockStage
     constexpr const int smem_ldx_scale = SCALE_SIZE_X(BLOCK_M);
     constexpr const int smem_ldw_scale = SCALE_SIZE_W(BLOCK_N);
 
+    // template Swizzle: identity mapping (offset -> offset)​
     ASwizzleType aSwizzle;
     BSwizzleType bSwizzle;
 
@@ -380,6 +382,7 @@ FQBMMAKernel<QuantType, ThreadBlockShape, WarpShape, MmaShape, kThreadBlockStage
     constexpr int smem_ldc = BLOCK_N / 2 + SKEW;
     int c_warp_offset = x_row_nums * smem_ldc + w_row_nums / 2;
 
+    // perform bit weight calculation, num = num * 2 ^ (x_bit + w_bit)
     FragmentC_FLOAT bits_sum;
 #pragma unroll
     for (int m = 0; m < WARP_M_TILES; m++) {
@@ -402,15 +405,14 @@ FQBMMAKernel<QuantType, ThreadBlockShape, WarpShape, MmaShape, kThreadBlockStage
         }
     }
 
-
-/*
-warp bit reduction
-chunk_m = 1    reduction_turn = 3   shuffle_tid = 16 8 4
-chunk_m = 2    reduction_turn = 2   shuffle_tid = 16 8
-chunk_m = 4    reduction_turn = 1   shuffle_tid = 16
-chunk_m = 8    reduction_turn = 0   shuffle_tid = 
-*/
-int shuffle_tid = WARP_SIZE / 2;
+    /*
+        warp bit reduction
+        chunk_m = 1    reduction_turn = 3   shuffle_tid = 16 8 4
+        chunk_m = 2    reduction_turn = 2   shuffle_tid = 16 8
+        chunk_m = 4    reduction_turn = 1   shuffle_tid = 16
+        chunk_m = 8    reduction_turn = 0   shuffle_tid = 
+    */
+    int shuffle_tid = WARP_SIZE / 2;
 #pragma unroll
     for(int i = chunk_m; i < MMA_M; i*=2){
         float num1 = __shfl_down_sync(0xFFFFFFFF, bits_sum.x[0], shuffle_tid);

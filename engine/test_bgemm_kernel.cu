@@ -62,9 +62,10 @@ void randomInitHalfBSCALE(half* &B, int rows, int cols){
     }
 }
 
+// Verify the correctness of the computation
 bool check_2D_half(half* A, half* B, int m, int n){
     try{
-        int max_error_nums = 5;
+        int max_error_nums = 5; // For debugging only - displays the location of the error.
         bool correct = true;
         for(int i=0;i<m;i++){
             for(int j=0;j<n;j++){
@@ -90,6 +91,7 @@ bool check_2D_half(half* A, half* B, int m, int n){
     }
 }
 
+// Binary exponentiation
 int int_pow(int base, int exp)
 {
     int result = 1;
@@ -217,10 +219,6 @@ int main(int argc, char **argv){
     cudaMemcpy(d_x_scale, h_x_scale, sizeof(half) * k / group_size * SCALE_PACKING_A(SCALE_SIZE_X(m)), cudaMemcpyHostToDevice);
     cudaMemcpy(d_w_scale, h_w_scale, sizeof(half) * k / group_size * n, cudaMemcpyHostToDevice);
 
-    if(debug_flag){
-        // for debug!
-    }
-
     if (w_bits <= 32) {
         flexq_bit_packing(d_w, d_w_pack, n, k, w_bits, stream);
         cudaError_t err = cudaGetLastError();
@@ -272,10 +270,6 @@ int main(int argc, char **argv){
 
     cudaMemcpy(h_out, d_out, m * n * sizeof(half), cudaMemcpyDeviceToHost);
     bool flag = check_2D_half(h_out, h_ref_out, m, n);
-    
-    if(debug_flag){
-        // for debug!
-    }
 
     if(!flag)cout << "ERROR! Inconsistent results!" << endl;
     else cout << "SUCCESS! consistent results!" << endl;
