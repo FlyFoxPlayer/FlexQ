@@ -1,0 +1,15 @@
+*~
+*.o
+*build*/
+__pycache__/
+.idea
+./translation
+.cache
+*.npy
+*.pth
+!tests/data/**/*.npy
+/notebooks
+**/.ipynb_checkpoints/
+
+/3rdparty/NeMo/
+/3rdparty/apex/

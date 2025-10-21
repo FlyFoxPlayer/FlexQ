@@ -67,9 +67,44 @@ To obtain benchmark results for the FlexQ kernel, please execute:
 bash test_flexq_kernel.sh
 ```
 
-### FasterTransformer E2E performance
-Due to the complexity of the FasterTransformer end-to-end codebase, we are currently planning a major code refactoring to eliminate redundancy and improve readability. Please stay tuned for future updates.
+### FasterTransformer E2E Performance
+Please complete the FasterTransformer compilation:
+```
+cd ./FlexQ/e2e
 
+# Make sure you install MPI
+apt-get update
+apt-get install libopenmpi-dev openmpi-bin
+
+bash build.sh
+``` 
+
+Modify the evaluation configuration:
+```
+# For LLaMA model, modify: e2e/examples/cpp/llama/llama_config.ini
+# For OPT model, modify: e2e/examples/cpp/multi_gpu_gpt/gpt_config.ini
+
+The following are the precision parameter settings for different baselines:
+FP16:               int8_mode=0
+W8A16 (CUTLASS):    int8_mode=1
+W8A8 (SmoothQuant): int8_mode=2
+W6Ax (FlexQ):       int8_mode=5
+Additionally, for multi-GPU testing, you need to modify the tensor_para_size parameter (set it to the number of GPUs).
+```
+
+Run e2e efficiency evaluation:
+```
+cd build_release
+
+# For single-GPU LLaMA model evaluation
+./bin/llama_example
+
+# For single-GPU OPT model evaluation
+./bin/multi_gpu_gpt_example
+
+# For multi-GPU evaluation
+mpirun -n 2 ./bin/llama_example
+```
 
 ## Results
 ### Accuracy Evaluation 
