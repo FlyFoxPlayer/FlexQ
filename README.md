@@ -68,14 +68,9 @@ bash test_flexq_kernel.sh
 ```
 
 ### FasterTransformer E2E Performance
-Please complete the FasterTransformer compilation:
+Please complete the FasterTransformer compilation (Make sure you install MPI):
 ```
 cd ./FlexQ/e2e
-
-# Make sure you install MPI
-apt-get update
-apt-get install libopenmpi-dev openmpi-bin
-
 bash build.sh
 ``` 
 
