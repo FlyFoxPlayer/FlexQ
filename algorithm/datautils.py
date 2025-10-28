@@ -100,9 +100,12 @@ def get_c4(nsamples, seed, seqlen, model):
             tmp = tokenizer(valdata[i]['text'], return_tensors='pt')
             if tmp.input_ids.shape[1] >= seqlen:
                 break
-        i = random.randint(0, tmp.input_ids.shape[1] - seqlen - 1)
-        j = i + seqlen
-        valenc.append(tmp.input_ids[:, i:j])
+        if tmp.input_ids.shape[1] == seqlen:
+            valenc.append(tmp.input_ids)
+        else:
+            i = random.randint(0, tmp.input_ids.shape[1] - seqlen - 1)
+            j = i + seqlen
+            valenc.append(tmp.input_ids[:, i:j])
     valenc = torch.hstack(valenc)
 
     return trainloader, valenc 
