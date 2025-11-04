@@ -3,6 +3,11 @@ FlexQ is a novel and efficient post-training INT6 quantization framework tailore
 
 ![kernel_overview](figures/kernel_overview.png)
 
+## News
+- [2025/11] 🔥 Added experimental results for the LLaMA-3 model. See our v2 paper [here](https://arxiv.org/abs/2508.04405) for details.
+- [2025/08] 🚀 We release the FlexQ code!
+- [2025/08] 🔥 Our paper is available on arXiv!
+
 ## Abstract
 Large Language Models (LLMs) demonstrate exceptional performance but entail significant memory and computational costs, restricting their practical deployment. While existing INT4/INT8 quantization reduces these costs, they often degrade accuracy or lack optimal efficiency. INT6 quantization offers a superior trade-off between model accuracy and inference efficiency, but lacks hardware support in modern GPUs, forcing emulation via higher-precision arithmetic units that limit acceleration. 
 
