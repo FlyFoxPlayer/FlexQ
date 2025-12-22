@@ -273,8 +273,20 @@ FQBMMAKernel<QuantType, ThreadBlockShape, WarpShape, MmaShape, kThreadBlockStage
                     const int *src =
                         tile_w + idx_k_tile * w_k_tile_offset + idx_chunk_n_id * w_chunk_n_offset + idx_bit * w_bit_offset + idx_chunk_n_row * w_chunk_n_row_offset;
                     int *dst = shared_tile_w + bSwizzle(idx);
+                    /*
+                    Across different GPU architectures, cache hints do not always lead to acceleration. As noted in the PTX documentation: 
+                    "Cache-policy is a hint to the cache subsystem and may not always be respected." If the policy does not take effect on specific hardware, 
+                    it is recommended to disable it, as it may introduce additional instruction overhead.
+                    
+                    Currently, we simply determine whether to enable it automatically based on the architecture. Please note that the current implementation 
+                    may not be optimal. It is advisable to test on the target hardware and decide whether to enable it accordingly.
+                    */
                     // Global mem loads data to shard mem, copy 128 b1 = int4 = 16 bytes
+#if GPU_ARCH >= 89 || GPU_ARCH == 80
+                    cpAsyncPredZfill<16>(dst, src, valid, zfill);
+#else
                     cpAsyncPredZfillCacheEvict<16>(dst, src, valid, zfill);
+#endif
                 }
 
                 const int *tile_x_scale = x_scale_panel + fetch * BLOCK_K / GROUP_SIZE * SCALE_SIZE_X(M);
