@@ -4,7 +4,7 @@ FlexQ is a novel and efficient post-training INT6 quantization framework tailore
 ![kernel_overview](figures/kernel_overview.png)
 
 ## News
-- [2025/12] 🔥 The v3 paper is about to be released. We have refactored the code to achieve a better performance upper bound, added an LLaMA3 kernel benchmark, and included evaluations against a 4-bit kernel baseline. The code repository will be updated alongside the paper, stay tuned!
+- [2025/12] 🔥 The **v3** paper is about to be released. We have refactored the code to achieve a **better performance upper bound**, added an **LLaMA3 kernel benchmark**, and included evaluations against a **4-bit kernel baseline**. The code repository will be updated alongside the paper, stay tuned!
 - [2025/11] 🔥 Added experimental results for the LLaMA-3 model. See our v2 paper [here](https://arxiv.org/abs/2508.04405) for details.
 - [2025/08] 🚀 We release the FlexQ code!
 - [2025/08] 🔥 Our paper is available on arXiv!
